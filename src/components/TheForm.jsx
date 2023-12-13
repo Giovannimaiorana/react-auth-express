@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import instance from "../axios";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import style from "../css/modules/TheForm.module.css";
@@ -13,7 +15,7 @@ export default function TheForm() {
     published: false,
   });
   console.log(formData);
-
+  const navigate = useNavigate();
   const [articles, setArticles] = useState([]);
   const [tags, setTags] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -81,6 +83,7 @@ export default function TheForm() {
       }
     });
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { title, content, image, category, tags, published } = formData;
@@ -97,17 +100,10 @@ export default function TheForm() {
           published,
         };
 
-        const response = await axios({
-          method: editingId !== null ? "put" : "post",
-          url: "http://localhost:3000/posts",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          data: editingId !== null ? { ...postData } : postData,
-        });
+        const response = await instance.post("/posts", postData);
 
         if (response.status === 200 || response.status === 201) {
-          fetchPosts(); // Refresh the posts after adding/editing
+          fetchPosts();
           setEditingId(null);
           setFormData({
             title: "",
@@ -120,6 +116,7 @@ export default function TheForm() {
         } else {
           console.error("Failed to add/edit post:", response.statusText);
         }
+        navigate("/");
       } catch (error) {
         console.error("Error adding/editing post:", error);
       }

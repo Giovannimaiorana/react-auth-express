@@ -21,7 +21,6 @@ function App() {
         <Routes>
           <Route>
             <Route path="/" element={<AppList />} />
-            <Route path="/form" element={<TheForm />} />
             <Route path="/post/:slug" element={<AppSinglePost />}></Route>
             <Route path="/login" element={<AppLogin />} />
             {/* Rotte private */}
@@ -30,6 +29,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <AppDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/form"
+              element={
+                <PrivateRoute>
+                  <TheForm />
                 </PrivateRoute>
               }
             />

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const AuthContext = createContext();
 
@@ -12,31 +13,35 @@ export const AuthProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    // Quando authData cambia, aggiorna anche isLogged
+    const storedAuthData = JSON.parse(localStorage.getItem("authData"));
+    if (storedAuthData) {
+      setAuthData(storedAuthData);
+    }
+  }, []);
+
+  useEffect(() => {
     setIsLogged(authData.isLogged);
   }, [authData]);
 
-  const mockUserData = {
-    email: "test@example.com",
-    password: "123",
-  };
-
   const login = async (email, password) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await axios.post("http://localhost:3000/login", {
+        email,
+        password,
+      });
 
-      if (email === mockUserData.email && password === mockUserData.password) {
-        localStorage.setItem(
-          "authData",
-          JSON.stringify({ user: mockUserData, isLogged: true })
-        );
-        setAuthData({ user: mockUserData, isLogged: true });
-        console.log("Login effettuato");
-        return true;
-      } else {
-        console.error("Login fallito. Credenziali non valide.");
-        return false;
-      }
+      const { token, userData } = response.data;
+
+      localStorage.setItem(
+        "authData",
+        JSON.stringify({ user: userData, token, isLogged: true })
+      );
+      localStorage.setItem("token", token);
+      setAuthData({ user: userData, isLogged: true });
+
+      console.log("Login effettuato");
+
+      return true;
     } catch (error) {
       console.error("Errore durante il login:", error);
       return false;

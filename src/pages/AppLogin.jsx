@@ -7,12 +7,12 @@ export default function AppLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const { login, isLogged } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Se l'utente è già autenticato, reindirizza alla pagina di dashboard
     if (isLogged) {
       navigate("/dashboard");
     }
@@ -22,15 +22,24 @@ export default function AppLogin() {
     e.preventDefault();
 
     setLoading(true);
+    setError(null);
 
     try {
       const loginSuccess = await login(email, password);
       console.log("Login success:", loginSuccess);
       if (loginSuccess) {
-        // La navigazione viene spostata all'interno di useEffect
       }
     } catch (error) {
-      console.error("Errore durante il login:", error);
+      throw new Error(error);
+      console.log("Dettagli dell'errore:", Error);
+
+      if (error.response && error.response.status === 404) {
+        setError("Credenziali non valide. Riprova.");
+      } else {
+        setError(
+          "Si è verificato un errore durante il login. Riprova più tardi."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -40,6 +49,9 @@ export default function AppLogin() {
     <div>
       <div className={style.ContainerForm}>
         <form onSubmit={handleLogin}>
+          {/* Aggiungi un elemento per mostrare gli errori */}
+          {error && <p style={{ color: "red" }}>{error}</p>}
+
           <div className={style.InputStyle}>
             <label htmlFor="email">Email</label>
             <input
